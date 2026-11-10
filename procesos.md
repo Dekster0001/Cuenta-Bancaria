@@ -47,14 +47,14 @@ Asegúrate de que el servicio de **MongoDB** esté corriendo en tu equipo (puert
 
 Si deseas insertar manualmente un documento de prueba en cada colección para validar la estructura:
 
+> **Nota:** Se recomienda no insertar a mano; usar `npm run seed` en el siguiente paso.
+
 #### En la colección `cuentas`:
 ```json
 {
   "numeroCuenta": "1001",
   "titular": "Ana Torres",
-  "saldo": 1500,
-  "createdAt": { "$date": "2026-11-09T18:00:00.000Z" },
-  "updatedAt": { "$date": "2026-11-09T18:00:00.000Z" }
+  "saldo": 1500
 }
 ```
 
@@ -64,12 +64,11 @@ Si deseas insertar manualmente un documento de prueba en cada colección para va
   "tipo": "deposito",
   "monto": 1500,
   "cuentaOrigen": null,
-  "cuentaDestino": "1001",
-  "fecha": { "$date": "2026-11-09T18:00:00.000Z" }
+  "cuentaDestino": "1001"
 }
 ```
 
-> **Nota:** No es necesario insertar datos a mano en Compass, ya que el script de *Seed* del siguiente paso poblará todo automáticamente.
+> **Importante sobre MongoDB Compass:** Compass no se actualiza solo: después de cada operación en la app, vuelve a ejecutar la consulta (Find) o pulsa el botón de refrescar; si aparece un error, cierra y reabre la pestaña de la colección.
 
 ---
 
@@ -93,6 +92,8 @@ npm install
 
 Desde la carpeta `/server`, ejecuta el script de siembra para inicializar las cuentas y transacciones base:
 
+> **Nota:** Cada cuenta inicia con un depósito de apertura igual a su saldo inicial, garantizando que el saldo siempre coincida matemáticamente con la suma de sus movimientos en el historial.
+
 ```bash
 cd server
 npm run seed
@@ -105,15 +106,15 @@ Verás una salida similar a esta:
 [Seed] Vaciando colecciones cuentas y transacciones...
 [Seed] Insertando cuentas de prueba...
 [Seed] 4 cuentas creadas con éxito.
-[Seed] Insertando transacciones iniciales de apertura...
-[Seed] 5 transacciones iniciales registradas.
+[Seed] Registrando depósitos de apertura...
+[Seed] 4 depósitos de apertura registrados con éxito.
 
---- RESUMEN DE CUENTAS CREADAS ---
-- Cuenta 1001 | Titular: Ana Torres | Saldo: S/ 1500.00
-- Cuenta 1002 | Titular: Luis Ramos | Saldo: S/ 800.00
-- Cuenta 1003 | Titular: María Quispe | Saldo: S/ 2500.00
-- Cuenta 1004 | Titular: Carlos Huamán | Saldo: S/ 300.00
-----------------------------------
+--- RESUMEN Y VERIFICACIÓN DE CUENTAS ---
+- Cuenta 1001 | Titular: Ana Torres | Saldo: S/ 1500.00 | Balance Movimientos: S/ 1500.00 -> OK
+- Cuenta 1002 | Titular: Luis Ramos | Saldo: S/ 800.00 | Balance Movimientos: S/ 800.00 -> OK
+- Cuenta 1003 | Titular: María Quispe | Saldo: S/ 2500.00 | Balance Movimientos: S/ 2500.00 -> OK
+- Cuenta 1004 | Titular: Carlos Huamán | Saldo: S/ 300.00 | Balance Movimientos: S/ 300.00 -> OK
+-----------------------------------------
 [Seed] Proceso completado exitosamente.
 ```
 
@@ -143,7 +144,9 @@ Abre en tu navegador favorito: **`http://localhost:3000`**.
 
 ## Paso 6: Pruebas de la API REST
 
-Puedes ejecutar estas pruebas en una terminal con `curl` o importarlas en extensiones como **Thunder Client** o **Postman**.
+> **Nota para usuarios de Windows PowerShell:** En PowerShell, `curl` es un alias de `Invoke-WebRequest`. Debes escribir explícitamente `curl.exe` (por ejemplo `curl.exe -X GET http://localhost:5000/api/cuenta`) o utilizar extensiones gráficas como **Thunder Client** o **Postman**.
+
+Puedes ejecutar estas pruebas en una terminal con `curl.exe` o importarlas en extensiones como **Thunder Client** o **Postman**.
 
 ### 1. Consultar lista general de cuentas (200 OK)
 ```bash

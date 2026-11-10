@@ -35,7 +35,7 @@ const manejarRespuesta = async (respuesta) => {
  * GET /api/cuenta
  */
 export const obtenerCuentas = async () => {
-  const res = await fetch(`${API_BASE}/cuenta`);
+  const res = await fetch(`${API_BASE}/cuenta`, { cache: 'no-store' });
   return manejarRespuesta(res);
 };
 
@@ -45,7 +45,9 @@ export const obtenerCuentas = async () => {
  * @param {string} cuentaId
  */
 export const obtenerCuentaPorId = async (cuentaId) => {
-  const res = await fetch(`${API_BASE}/cuenta/${encodeURIComponent(cuentaId)}`);
+  const res = await fetch(`${API_BASE}/cuenta/${encodeURIComponent(cuentaId)}`, {
+    cache: 'no-store',
+  });
   return manejarRespuesta(res);
 };
 
@@ -61,6 +63,7 @@ export const realizarDeposito = async ({ cuentaId, monto }) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ cuentaId, monto: Number(monto) }),
+    cache: 'no-store',
   });
   return manejarRespuesta(res);
 };
@@ -77,6 +80,7 @@ export const realizarRetiro = async ({ cuentaId, monto }) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ cuentaId, monto: Number(monto) }),
+    cache: 'no-store',
   });
   return manejarRespuesta(res);
 };
@@ -94,6 +98,7 @@ export const realizarTransferencia = async ({ cuentaOrigen, cuentaDestino, monto
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ cuentaOrigen, cuentaDestino, monto: Number(monto) }),
+    cache: 'no-store',
   });
   return manejarRespuesta(res);
 };
@@ -106,7 +111,8 @@ export const realizarTransferencia = async ({ cuentaOrigen, cuentaDestino, monto
  */
 export const obtenerHistorial = async (cuentaId, limit = 20) => {
   const res = await fetch(
-    `${API_BASE}/cuenta/${encodeURIComponent(cuentaId)}/historial?limit=${limit}`
+    `${API_BASE}/cuenta/${encodeURIComponent(cuentaId)}/historial?limit=${limit}`,
+    { cache: 'no-store' }
   );
   return manejarRespuesta(res);
 };

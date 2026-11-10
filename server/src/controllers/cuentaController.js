@@ -183,13 +183,13 @@ export const realizarTransferencia = async (req, res, next) => {
     // Verificamos existencia de la cuenta de origen
     const existeOrigen = await Cuenta.findOne({ numeroCuenta: origenLimpio });
     if (!existeOrigen) {
-      return res.status(404).json({ mensaje: 'La cuenta de origen no existe' });
+      return res.status(404).json({ mensaje: `La cuenta de origen ${origenLimpio} no existe` });
     }
 
     // Verificamos existencia de la cuenta de destino
     const existeDestino = await Cuenta.findOne({ numeroCuenta: destinoLimpio });
     if (!existeDestino) {
-      return res.status(404).json({ mensaje: 'La cuenta de destino no existe' });
+      return res.status(404).json({ mensaje: `La cuenta de destino ${destinoLimpio} no existe` });
     }
 
     // Paso 1: Débito condicionado en cuenta origen (solo si saldo >= monto)

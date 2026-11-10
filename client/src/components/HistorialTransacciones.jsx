@@ -47,7 +47,7 @@ export const HistorialTransacciones = ({
         insigniaColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
         signo: '+',
         montoColor: 'text-emerald-600',
-        origen: 'Taquilla / Depósito',
+        origen: tx.cuentaOrigen || 'Taquilla / Depósito',
         destino: tx.cuentaDestino || cuentaActivaId,
       };
     }

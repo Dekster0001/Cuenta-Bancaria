@@ -29,56 +29,49 @@ const sembrarDatos = async () => {
     const cuentasCreadas = await Cuenta.insertMany(cuentasIniciales);
     console.log(`[Seed] ${cuentasCreadas.length} cuentas creadas con éxito.`);
 
-    // 3. Crear transacciones iniciales de depósito para cada cuenta
-    console.log('[Seed] Insertando transacciones iniciales de apertura...');
-    const ahora = new Date();
-    const transaccionesIniciales = [
-      {
-        tipo: 'deposito',
-        monto: 1500,
-        cuentaOrigen: null,
-        cuentaDestino: '1001',
-        fecha: new Date(ahora.getTime() - 1000 * 60 * 60 * 24 * 3), // hace 3 días
-      },
-      {
-        tipo: 'deposito',
-        monto: 800,
-        cuentaOrigen: null,
-        cuentaDestino: '1002',
-        fecha: new Date(ahora.getTime() - 1000 * 60 * 60 * 24 * 2), // hace 2 días
-      },
-      {
-        tipo: 'deposito',
-        monto: 2500,
-        cuentaOrigen: null,
-        cuentaDestino: '1003',
-        fecha: new Date(ahora.getTime() - 1000 * 60 * 60 * 24 * 1), // hace 1 día
-      },
-      {
-        tipo: 'deposito',
-        monto: 300,
-        cuentaOrigen: null,
-        cuentaDestino: '1004',
-        fecha: new Date(ahora.getTime() - 1000 * 60 * 60 * 5), // hace 5 horas
-      },
-      // Movimiento adicional entre cuentas para ilustrar transferencia en el historial
-      {
-        tipo: 'transferencia',
-        monto: 100,
-        cuentaOrigen: '1001',
-        cuentaDestino: '1002',
-        fecha: new Date(ahora.getTime() - 1000 * 60 * 60 * 2), // hace 2 horas
-      },
-    ];
+    // 3. Crear exactamente una transacción por cuenta (depósito de apertura)
+    console.log('[Seed] Registrando depósitos de apertura...');
+    const fechaApertura = new Date();
+    const transaccionesApertura = cuentasIniciales.map((c) => ({
+      tipo: 'deposito',
+      monto: c.saldo,
+      cuentaOrigen: null,
+      cuentaDestino: c.numeroCuenta,
+      fecha: fechaApertura,
+    }));
+    const transaccionesCreadas = await Transaccion.insertMany(transaccionesApertura);
+    console.log(`[Seed] ${transaccionesCreadas.length} depósitos de apertura registrados con éxito.`);
 
-    await Transaccion.insertMany(transaccionesIniciales);
-    console.log(`[Seed] ${transaccionesIniciales.length} transacciones iniciales registradas.`);
+    console.log('\n--- RESUMEN Y VERIFICACIÓN DE CUENTAS ---');
+    for (const c of cuentasIniciales) {
+      const movimientos = await Transaccion.find({
+        $or: [{ cuentaOrigen: c.numeroCuenta }, { cuentaDestino: c.numeroCuenta }],
+      });
 
-    console.log('\n--- RESUMEN DE CUENTAS CREADAS ---');
-    cuentasIniciales.forEach((c) => {
-      console.log(`- Cuenta ${c.numeroCuenta} | Titular: ${c.titular} | Saldo: S/ ${c.saldo.toFixed(2)}`);
-    });
-    console.log('----------------------------------\n');
+      const totalCalculado = movimientos.reduce((acumulado, t) => {
+        if (t.tipo === 'deposito' && t.cuentaDestino === c.numeroCuenta) {
+          return acumulado + t.monto;
+        }
+        if (t.tipo === 'transferencia' && t.cuentaDestino === c.numeroCuenta) {
+          return acumulado + t.monto;
+        }
+        if (t.tipo === 'retiro' && t.cuentaOrigen === c.numeroCuenta) {
+          return acumulado - t.monto;
+        }
+        if (t.tipo === 'transferencia' && t.cuentaOrigen === c.numeroCuenta) {
+          return acumulado - t.monto;
+        }
+        return acumulado;
+      }, 0);
+
+      const totalRedondeado = Math.round((totalCalculado + Number.EPSILON) * 100) / 100;
+      const estado = totalRedondeado === c.saldo ? 'OK' : 'DESCUADRE';
+
+      console.log(
+        `- Cuenta ${c.numeroCuenta} | Titular: ${c.titular} | Saldo: S/ ${c.saldo.toFixed(2)} | Balance Movimientos: S/ ${totalRedondeado.toFixed(2)} -> ${estado}`
+      );
+    }
+    console.log('-----------------------------------------\n');
 
     console.log('[Seed] Proceso completado exitosamente.');
     await mongoose.connection.close();

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   realizarDeposito,
   realizarRetiro,
@@ -25,6 +25,21 @@ export const FormOperacion = ({
   const [cuentaDestino, setCuentaDestino] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState(null); // { tipo: 'exito' | 'error', texto: string }
+
+  // Limpiar mensajes al cambiar de cuenta activa
+  useEffect(() => {
+    setMensaje(null);
+  }, [cuentaActivaId]);
+
+  // Desaparecer el mensaje de éxito automáticamente después de 4 segundos
+  useEffect(() => {
+    if (mensaje && mensaje.tipo === 'exito') {
+      const temporizador = setTimeout(() => {
+        setMensaje(null);
+      }, 4000);
+      return () => clearTimeout(temporizador);
+    }
+  }, [mensaje]);
 
   // Cambiar pestaña y limpiar estados
   const cambiarPestana = (tipo) => {
@@ -104,9 +119,9 @@ export const FormOperacion = ({
       setMonto('');
       setCuentaDestino('');
 
-      // Notificar al componente padre para actualizar saldo e historial
+      // Notificar al componente padre para actualizar saldo e historial esperando su finalización
       if (typeof onOperacionExitosa === 'function') {
-        onOperacionExitosa();
+        await onOperacionExitosa();
       }
     } catch (error) {
       // Capturar y mostrar el mensaje devuelto por la API

@@ -1,6 +1,6 @@
 # Sistema de Gestión de Cuenta Bancaria Simplificada
 
-Sistema web full-stack para la gestión de cuentas bancarias de ahorro, desarrollado con fines académicos para la asignatura de **Ingeniería Web**. El sistema permite consultar saldos, realizar depósitos, retiros con validación estricta de saldo y transferencias inmediatas entre cuentas con reversión automática (compensación), manteniendo un historial detallado de movimientos.
+Sistema web full-stack para la gestión de cuentas bancarias de ahorro, desarrollado con fines académicos. El sistema permite consultar saldos, realizar depósitos, retiros con validación estricta de saldo y transferencias inmediatas entre cuentas con reversión automática (compensación), manteniendo un historial detallado de movimientos.
 
 ---
 
@@ -102,7 +102,9 @@ npm install
 
 ## 🌱 Carga de Datos Iniciales (Seed)
 
-Para vaciar la base de datos y cargar las cuentas y movimientos de prueba universitarios:
+Para vaciar la base de datos e inicializar las 4 cuentas de prueba universitarias:
+
+> **Nota:** Cada cuenta inicia con un depósito de apertura igual a su saldo inicial, garantizando que el saldo siempre coincida matemáticamente con la suma de sus movimientos en el historial.
 
 ```bash
 cd server
@@ -176,7 +178,7 @@ Todas las respuestas de error siguen el estándar:
 
 ## 💡 Decisiones Técnicas y Arquitectura
 
-### 1. Transferencia Atómica mediante Compensación (Saga Pattern)
+### 1. Transferencia consistente mediante débito condicionado y compensación (MongoDB standalone no soporta transacciones multi-documento sin replica set)
 - **Contexto:** En instalaciones estándar locales de MongoDB (Standalone), las transacciones multi-documento (`session.startTransaction()`) **no están habilitadas**, ya que MongoDB exige por diseño que el servidor pertenezca a un *Replica Set*.
 - **Solución implementada:** Se diseñó un flujo de débito condicionado + crédito + registro con mecanismo de compensación:
   1. Se debita la cuenta de origen usando la operación atómica `findOneAndUpdate` filtrando con `{ saldo: { $gte: monto } }`. Si el saldo no alcanza, la operación se cancela de inmediato.

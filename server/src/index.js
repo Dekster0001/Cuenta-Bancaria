@@ -10,9 +10,20 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Desactivar ETag para evitar respuestas cacheadas 304
+app.disable('etag');
+
 // Middlewares globales
 app.use(cors());
 app.use(express.json());
+
+// Middleware para evitar respuestas cacheadas en la API
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
 
 // Manejador específico para solicitudes con cuerpo JSON malformado (400)
 app.use((err, req, res, next) => {
