@@ -26,7 +26,6 @@ Sistema web full-stack para la gestión de cuentas bancarias de ahorro, desarrol
 CuentaBancaria/
 ├── .gitignore                      # Reglas de exclusión de Git (node_modules, .env, dist)
 ├── README.md                       # Documentación principal del sistema
-├── procesos.md                     # Guía paso a paso de configuración y pruebas manuales
 │
 ├── server/                         # Backend (API REST Node.js + Express)
 │   ├── .env                        # Variables de entorno locales (ignorado por Git)
